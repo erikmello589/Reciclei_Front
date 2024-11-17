@@ -1,3 +1,5 @@
+coletaPontos("http://localhost:8080/PontosMapa", localStorage.getItem('acessToken'))
+
 //token
 mapboxgl.accessToken =
   "pk.eyJ1IjoianVsaWFzbnRuIiwiYSI6ImNtMjEwMDMxbDBwZW4yam9lNTE2a3h2M3UifQ.6MCCunBBWkyYEmwxP-u7fA";
@@ -122,3 +124,33 @@ var markerv = new mapboxgl.Marker(preto)
             document.documentElement.style.fontSize = fontSize + 'px';
         }
     });
+
+    async function coletaPontos(url, accessToken) 
+    {
+      try {
+          // Configuração dos headers, incluindo o access token para autenticação
+          const response = await fetch(url, {
+              method: 'GET',
+              headers: {
+                  'Authorization': `Bearer ${accessToken}`, // Envia o access token
+                  'Content-Type': 'application/json' // Define o tipo de conteúdo
+              }
+          });
+  
+          // Verifica se a resposta da API foi bem-sucedida (status 200)
+          if (!response.ok) {
+              console.log("Erro ao consumir a API");
+              throw new Error(`Erro: ${response.status} - ${response.statusText}`);
+          }
+  
+          // Converte a resposta para JSON
+          const data = await response.json();
+          console.log(data);
+          return data; // Retorna os dados obtidos da API
+  
+      } catch (error) {
+          console.error("Erro ao fazer a requisição:", error);
+          throw error; // Relança o erro para tratamento adicional
+      }
+    }
+  
