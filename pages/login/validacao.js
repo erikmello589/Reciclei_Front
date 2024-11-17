@@ -43,5 +43,56 @@ document.querySelector('form').addEventListener('submit', function(event) {
     // Se houver erro, impedir o envio do formulário
     if (!valid) {
         event.preventDefault();
+    } else {
+        alert('Cadastro realizado com sucesso!');
+        // Aqui você pode fazer o envio real do formulário
+        document.querySelector('form').addEventListener("submit", function(event) {
+            event.preventDefault(); // Impede o envio padrão do formulário
+            
+            // Obtém os valores do login e senha
+            const username = document.getElementById("login").value;
+            const password = document.getElementById("password").value;
+            
+            // Chama a função de login
+            login(username, password);
+        });
     }
 });
+
+async function login(username, password) {
+    const url = "http://localhost:8080/login"; // Substitua pela URL da sua API
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
+
+        if (!response.ok) {
+            console.log("erro na requisição");
+            throw new Error(`Erro na requisição: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log(data);
+
+        // Verifica se o accessToken e expiresIn estão na resposta
+        if (data.accessToken && data.expiresIn) {
+            // Armazena no localStorage
+            localStorage.setItem("accessToken", data.accessToken);
+            localStorage.setItem("expiresIn", data.expiresIn);
+            console.log("Token armazenado com sucesso!");
+            alert("Login Realizado com sucesso, redirecionando para o mapa")
+        } else {
+            throw new Error("Dados de autenticação ausentes na resposta.");
+        }
+    } catch (error) {
+        console.error("Erro ao fazer login:", error);
+    }
+}

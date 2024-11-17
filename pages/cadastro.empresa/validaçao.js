@@ -64,9 +64,37 @@ document.getElementById('form').addEventListener('submit', function (event) {
 
     // Se todas as validações passarem, exibe mensagem de sucesso
     if (isValid) {
-        alert('Cadastro realizado com sucesso!');
         // Aqui você pode fazer o envio real do formulário
         // Exemplo: document.getElementById('form').submit();
+        document.getElementById('form').addEventListener("submit", function(event) {
+            event.preventDefault(); // Impede o envio padrão do formulário
+            
+            // Obtém os valores do login e senha
+            const username = document.getElementById("login").value;
+            const password = document.getElementById("password").value;
+            const name = document.getElementById("name").value;
+            const cnpj = document.getElementById("cnpj").value;
+            const email = document.getElementById("email").value;
+            const telFix = document.getElementById("tel-fix").value;
+            const cell = document.getElementById("cell").value;
+            const enderess = document.getElementById("enderess").value;
+
+            const newUser = {
+                username: username,
+                password: password,
+                nomeEmpresa: name,
+                cnpj: cnpj,
+                email: email,
+                telefone: telFix,
+                celular: cell,
+                cep: "12345-678",
+                endereco: enderess,
+                numeroEndereco: "123"
+            };
+            console.log(newUser)
+            // Chama a função de register
+            register(newUser);
+        });
     }
 });
 
@@ -109,6 +137,36 @@ function validarCNPJ(cnpj) {
     if (resultado != digitos.charAt(1)) return false;
 
     return true;
+}
+
+async function register(userData) {
+    const apiUrl = "http://localhost:8080/registerEmpresa";
+
+    try {
+        // Fazendo a requisição POST
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userData),
+        });
+
+        // Processa a resposta da API
+        if (!response.ok) {
+            alert("ERRO");
+            throw new Error(`Erro: ${response.status} - ${response.statusText}`);
+        }
+
+
+        console.log("Registro bem-sucedido");
+        alert("Registro bem-sucedido");
+
+        return;
+    } catch (error) {
+        console.error("Erro ao registrar:", error);
+        alert("Ocorreu um erro ao tentar registrar. Tente novamente mais tarde.");
+    }
 }
 
 
