@@ -1,4 +1,6 @@
-document.querySelector('form').addEventListener('submit', function(event) {
+document.querySelector('form').addEventListener('submit', function (event) {
+    event.preventDefault(); // Impede o envio padrão do formulário
+
     const loginInput = document.getElementById('login');
     const passwordInput = document.getElementById('password');
     const loginError = document.getElementById('login-error');
@@ -40,23 +42,15 @@ document.querySelector('form').addEventListener('submit', function(event) {
         valid = false;
     }
 
-    // Se houver erro, impedir o envio do formulário
+    // Se houver erros, não prosseguir com o envio
     if (!valid) {
-        event.preventDefault();
-    } else {
-        alert('Cadastro realizado com sucesso!');
-        // Aqui você pode fazer o envio real do formulário
-        document.querySelector('form').addEventListener("submit", function(event) {
-            event.preventDefault(); // Impede o envio padrão do formulário
-            
-            // Obtém os valores do login e senha
-            const username = document.getElementById("login").value;
-            const password = document.getElementById("password").value;
-            
-            // Chama a função de login
-            login(username, password);
-        });
+        return;
     }
+
+    // Caso a validação passe, chama a função de login
+    const username = loginInput.value.trim();
+    const password = passwordInput.value.trim();
+    login(username, password);
 });
 
 async function login(username, password) {
@@ -75,20 +69,19 @@ async function login(username, password) {
         });
 
         if (!response.ok) {
-            console.log("erro na requisição");
+            console.log("Erro na requisição");
             throw new Error(`Erro na requisição: ${response.status} - ${response.statusText}`);
         }
 
         const data = await response.json();
         console.log(data);
 
-        // Verifica se o accessToken e expiresIn estão na resposta
-        if (data.accessToken && data.expiresIn) {
+        // Verifica se o acessToken e expiresIn estão na resposta
+        if (data.acessToken && data.expiresIn) {
             // Armazena no localStorage
-            localStorage.setItem("accessToken", data.accessToken);
+            localStorage.setItem("acessToken", data.acessToken);
             localStorage.setItem("expiresIn", data.expiresIn);
-            console.log("Token armazenado com sucesso!");
-            alert("Login Realizado com sucesso, redirecionando para o mapa")
+            alert("Login realizado com sucesso, redirecionando para o mapa");
         } else {
             throw new Error("Dados de autenticação ausentes na resposta.");
         }
