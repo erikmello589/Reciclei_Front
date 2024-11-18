@@ -173,7 +173,8 @@ async function register(userData) {
 
 
         console.log("Registro bem-sucedido");
-        alert("Registro bem-sucedido");
+        alert("Registro bem-sucedido, redirecionando para tela inicial");
+        setTimeout(window.location.href = "/index.html#home", 500);
 
         return;
     } catch (error) {

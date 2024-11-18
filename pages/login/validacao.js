@@ -81,7 +81,9 @@ async function login(username, password) {
             // Armazena no localStorage
             localStorage.setItem("acessToken", data.acessToken);
             localStorage.setItem("expiresIn", data.expiresIn);
-            alert("Login realizado com sucesso, redirecionando para o mapa");
+            console.log("Login bem-sucedido");
+            alert("Login bem-sucedido, redirecionando para tela inicial");
+            setTimeout(window.location.href = "/index.html#home", 500);
         } else {
             throw new Error("Dados de autenticação ausentes na resposta.");
         }
