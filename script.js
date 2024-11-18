@@ -78,6 +78,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    const mapaLink = document.getElementById('recicleJa'); // Seleciona o link do mapa
+
+    mapaLink.addEventListener("click", function (event) {
+        event.preventDefault(); // Impede o redirecionamento imediato
+
+        const accessToken = localStorage.getItem("acessToken");
+        const expiresIn = localStorage.getItem("expiresIn");
+
+        if (accessToken && expiresIn) {
+            // Redireciona para a página do mapa
+            window.location.href = "pages/mapa/endmapa.html";
+        } else {
+            // Exibe alerta caso o usuário não esteja autorizado
+            alert("Você não está autorizado a acessar essa página. Faça o Login ou Crie uma conta.");
+            setTimeout(window.location.href = "pages/login/login.html", 500)
+        }
+    });
+});
+
 
 // Link de Login
 document.addEventListener("DOMContentLoaded", function () {
