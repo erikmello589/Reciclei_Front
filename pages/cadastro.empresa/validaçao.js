@@ -34,6 +34,17 @@ document.getElementById('form').addEventListener('submit', function (event) {
        document.getElementById('cell-error').textContent = 'O celular completo é obrigatório.'
     }
 
+    //validalção do celular (campo obrigatório)
+   const cep = document.getElementById('cep').value;
+   if (cep.trim() === "") {
+       document.getElementById('cep-error').textContent = 'O CEP é obrigatório.'
+    }
+
+    const numeroEndereco = document.getElementById('cep').value;
+   if (numeroEndereco.trim() === "") {
+       document.getElementById('numeroEndereco-error"').textContent = 'O Numero do Endereço é obrigatório.'
+    }
+
     // Validação do endereço completo (campo obrigatório)
     const address = document.getElementById('enderess').value;
     if (address.trim() === "") {
@@ -77,6 +88,8 @@ document.getElementById('form').addEventListener('submit', function (event) {
             const email = document.getElementById("email").value;
             const telFix = document.getElementById("tel-fix").value;
             const cell = document.getElementById("cell").value;
+            const cep = document.getElementById("cep").value;
+            const numeroEndereco = document.getElementById("numeroEndereco").value;
             const enderess = document.getElementById("enderess").value;
 
             const newUser = {
@@ -87,9 +100,9 @@ document.getElementById('form').addEventListener('submit', function (event) {
                 email: email,
                 telefone: telFix,
                 celular: cell,
-                cep: "12345-678",
+                cep: cep,
                 endereco: enderess,
-                numeroEndereco: "123"
+                numeroEndereco: numeroEndereco
             };
             console.log(newUser)
             // Chama a função de register
@@ -169,7 +182,48 @@ async function register(userData) {
     }
 }
 
+// Função para buscar endereço pelo CEP
+async function buscarEndereco(cep) {
+    const url = `https://viacep.com.br/ws/${cep}/json/`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Erro ao buscar o endereço");
+
+        const data = await response.json();
+        if (data.erro) throw new Error("CEP não encontrado");
+
+        return `${data.logradouro}, ${data.bairro}, ${data.localidade}, ${data.uf}`;
+    } catch (error) {
+        console.error(error.message);
+        return null;
+    }
+}
+
+// Evento para buscar o endereço ao finalizar a digitação do CEP
+document.getElementById("cep").addEventListener("blur", async () => {
+    const cep = document.getElementById("cep").value.replace(/\D/g, ""); // Remove caracteres não numéricos
+    const enderecoInput = document.getElementById("enderess");
+
+    // Verifica se o CEP tem 8 dígitos
+    if (cep.length === 8) {
+        enderecoInput.value = "Buscando endereço..."; // Mensagem temporária
+        const endereco = await buscarEndereco(cep);
+
+        if (endereco) {
+            enderecoInput.value = endereco; // Preenche o campo com o endereço encontrado
+        } else {
+            enderecoInput.value = ""; // Limpa o campo se o endereço não for encontrado
+            alert("Endereço não encontrado para o CEP informado.");
+        }
+    } else {
+        alert("CEP inválido. Por favor, insira um CEP com 8 dígitos.");
+    }
+});
+
+
 
 $('#cnpj').mask('00.000.000/0001-00');
 $('#tel-fix').mask('(00) 00000-0000');
 $('#cell').mask('(00) 00000-0000');
+$('#cep').mask('00000-000');
