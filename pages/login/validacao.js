@@ -69,6 +69,7 @@ async function login(username, password) {
         });
 
         if (!response.ok) {
+            alert("Credenciais Inválidas ou Login Inexistente.\n\nExperimente criar uma conta ou verificar se o servidor está ativo.");
             console.log("Erro na requisição");
             throw new Error(`Erro na requisição: ${response.status} - ${response.statusText}`);
         }

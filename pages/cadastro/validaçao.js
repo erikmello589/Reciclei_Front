@@ -170,7 +170,7 @@ async function register(userData) {
 
         // Processa a resposta da API
         if (!response.ok) {
-            alert("ERRO");
+            alert("Credenciais já existentes no sistema ou Erro ao acessar o servidor.\n\nExperimente alterar o Nome de Usuário ou verifique se o servidor está ativo.");
             throw new Error(`Erro: ${response.status} - ${response.statusText}`);
         }
 

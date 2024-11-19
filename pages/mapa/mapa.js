@@ -1,5 +1,3 @@
-coletaPontos("http://localhost:8080/PontosMapa", localStorage.getItem('acessToken'))
-
 //token
 mapboxgl.accessToken =
   "pk.eyJ1IjoianVsaWFzbnRuIiwiYSI6ImNtMjEwMDMxbDBwZW4yam9lNTE2a3h2M3UifQ.6MCCunBBWkyYEmwxP-u7fA";
@@ -11,74 +9,6 @@ var map = new mapboxgl.Map({
   center: [-43.6348223, -22.9292316], // Coordenadas [longitud, latitud]
   zoom: 9, // zoom inicial
 });
-
-//AZUL: papel/papelão;
-var azul = document.createElement("div");
-azul.className = "custom-marker";
-azul.style.backgroundColor = "rgba(0, 0, 255, 0.5)"; // cor
-azul.style.width = "30px";
-azul.style.height = "30px";
-azul.style.borderRadius = "50%";
-
-//VERMELHO: plástico;
-var vermelho = document.createElement("div");
-vermelho.className = "custom-marker";
-vermelho.style.backgroundColor = "rgba(255, 0, 0, 0.5)";
-vermelho.style.width = "30px";
-vermelho.style.height = "30px";
-vermelho.style.borderRadius = "50%";
-
-//VERDE: vidro;
-var verde = document.createElement("div");
-verde.className = "custom-marker";
-verde.style.backgroundColor = "rgba(0, 255, 0, 0.5)";
-verde.style.width = "30px";
-verde.style.height = "30px";
-verde.style.borderRadius = "50%";
-
-//AMARELO: metal;
-var amerelo = document.createElement("div");
-amerelo.className = "custom-marker";
-amerelo.style.backgroundColor = "rgba(255, 255, 0, 0.5)";
-amerelo.style.width = "30px";
-amerelo.style.height = "30px";
-amerelo.style.borderRadius = "50%";
-
-//PRETO: madeira;
-var preto = document.createElement("div");
-preto.className = "custom-marker";
-preto.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-preto.style.width = "30px";
-preto.style.height = "30px";
-preto.style.borderRadius = "50%";
-
-//LARANJA: resíduos perigosos (como pilhas e baterias);
-var laranja = document.createElement("div");
-laranja.className = "custom-marker";
-laranja.style.backgroundColor = "rgba(255, 165, 0, 0.5)";
-laranja.style.width = "30px";
-laranja.style.height = "30px";
-laranja.style.borderRadius = "50%";
-
-var popup = new mapboxgl.Popup({ offset: 25 }) //cria o popup
-  .setText("minha casa"); // texto popup
-var marker = new mapboxgl.Marker(azul) //cria o marcador
-  .setLngLat([-43.6348223, -22.9292316]) //coodernada
-  .setPopup(popup) //marcador
-  .addTo(map); //adiciona mapa
-
-var popupt = new mapboxgl.Popup({ offset: 25 }).setText("trabalho");
-var markert = new mapboxgl.Marker(vermelho)
-  .setLngLat([-43.6090246, -22.8682655])
-  .setPopup(popupt)
-  .addTo(map);
-
-var popupv = new mapboxgl.Popup({ offset: 25 }).setText("algo");
-var markerv = new mapboxgl.Marker(preto)
-  .setLngLat([-43.560778, -22.9015072])
-  .setPopup(popupv)
-  .addTo(map);
-
 
   
  // lightdark abaixo
@@ -125,32 +55,127 @@ var markerv = new mapboxgl.Marker(preto)
         }
     });
 
-    async function coletaPontos(url, accessToken) 
-    {
+    async function fetchEmpresas(apiUrl) {
       try {
-          // Configuração dos headers, incluindo o access token para autenticação
-          const response = await fetch(url, {
+          // Recupera o token do localStorage
+          const token = localStorage.getItem('acessToken');
+          if (!token) {
+              alert("Usuário não autenticado para acessar a página");
+              console.log("Usuário não autenticado para acessar a página")
+              throw new Error('Token não encontrado no localStorage');
+          }
+  
+          // Faz a requisição GET
+          const response = await fetch(apiUrl, {
               method: 'GET',
               headers: {
-                  'Authorization': `Bearer ${accessToken}`, // Envia o access token
-                  'Content-Type': 'application/json' // Define o tipo de conteúdo
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
               }
           });
   
-          // Verifica se a resposta da API foi bem-sucedida (status 200)
           if (!response.ok) {
-              console.log("Erro ao consumir a API");
-              throw new Error(`Erro: ${response.status} - ${response.statusText}`);
+              throw new Error(`Erro na requisição: ${response.status} - ${response.statusText}`);
           }
   
-          // Converte a resposta para JSON
           const data = await response.json();
-          console.log(data);
-          return data; // Retorna os dados obtidos da API
   
+          return data;
       } catch (error) {
-          console.error("Erro ao fazer a requisição:", error);
-          throw error; // Relança o erro para tratamento adicional
+          console.error('Erro ao buscar dados da API:', error);
+          return null;
       }
+  }
+
+  async function getCoordinates(address, proximityCoordinates) {
+    const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?proximity=${proximityCoordinates.join(',')}&access_token=${mapboxgl.accessToken}`;
+
+    try {
+        const response = await fetch(geocodeUrl);
+        if (!response.ok) {
+            console.log("API não retornou OK");
+            throw new Error(`Erro na Geocoding API: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log(data)
+
+        if (data.features && data.features.length > 0) {
+            const [longitude, latitude] = data.features[0].center;
+            return { longitude, latitude };
+        } else {
+            console.log('Endereço não encontrado.');
+            return null;
+        }
+    } catch (error) {
+        console.log('Erro ao buscar coordenadas:', error.message);
+        return null;
     }
+}
+
+  const apiUrl = 'http://localhost:8080/PontosMapa';
+  
+  fetchEmpresas(apiUrl)
+    .then(async data => {
+        if (data && data.listaEmpresas) {
+            const empresas = data.listaEmpresas;
+
+            for (const empresa of empresas) {
+                // Cria o marcador com estilo customizado
+                var marcador = document.createElement("div");
+                marcador.className = "custom-marker";
+                marcador.style.backgroundColor = gerarCorAleatoria();
+                marcador.style.width = "30px";
+                marcador.style.height = "30px";
+                marcador.style.borderRadius = "50%";
+
+                // Texto do popup
+                const textoPopup = `
+                    Nome: ${empresa.nomeEmpresa}
+                    CNPJ: ${empresa.cnpj}
+                    Endereço: ${empresa.endereco}, ${empresa.numeroEndereco}
+                    Telefone: ${empresa.telefone}
+                `;
+
+                // Criar popup para a empresa
+                var popup = new mapboxgl.Popup({ offset: 25 })
+                    .setText(textoPopup);
+
+                const endereco = `${empresa.endereco}, ${empresa.numeroEndereco}`;
+                const proximidade = [-43.6348223, -22.9292316]; // Coordenadas de proximidade
+
+                try {
+                    const coordenadas = await getCoordinates(endereco, proximidade);
+
+                    if (coordenadas) {
+                        console.log(`Longitude: ${coordenadas.longitude}, Latitude: ${coordenadas.latitude}`);
+                        var marker = new mapboxgl.Marker(marcador)
+                            .setLngLat([coordenadas.longitude, coordenadas.latitude])
+                            .setPopup(popup)
+                            .addTo(map);
+                    } else {
+                        console.log("Não foi possível obter as coordenadas.");
+                    }
+                } catch (error) {
+                    console.error("Erro ao obter coordenadas:", error);
+                }
+            }
+        } else {
+            console.error('Nenhuma empresa encontrada.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao buscar empresas:', error);
+    });
+
+
+function gerarCorAleatoria() {
+    const r = Math.floor(Math.random() * 256); // Vermelho
+    const g = Math.floor(Math.random() * 256); // Verde
+    const b = Math.floor(Math.random() * 256); // Azul
+    const a = 0.5; // Transparência
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+  
   
