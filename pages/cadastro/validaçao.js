@@ -101,6 +101,7 @@ document.getElementById('form').addEventListener('submit', function (event) {
             const cell = document.getElementById("cell").value;
             const endereco = document.getElementById("enderess").value;
             const dataNasc = document.getElementById("data").value;
+            const sexo = document.querySelector('input[name="sexo"]:checked').value;
 
             const newUser = {
                 username: username,
@@ -115,7 +116,7 @@ document.getElementById('form').addEventListener('submit', function (event) {
                 endereco: endereco,
                 numeroEndereco: "123",
                 dataNasc: dataNasc,
-                sexo: "Homem"
+                sexo: sexo
             };
             console.log(newUser)
             // Chama a função de register
